@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Ponderosa Hills Community Watch</title>
+        <script>
+// Explination of what this js is doing...
+// original source found at https://stackoverflow.com/questions/12661124/how-to-apply-hovering-on-html-area-tag
+// What I did was to create a canvas element that I then position in front of the image map. 
+// Then, whenever an area is moused-over, I call a func that gets the coord string for that shape and the shape-type. 
+// If it's a poly I use the coords to draw an outline on the canvas.
+// If it's a rect I draw a rect outline. You could easily add code to deal with circles.
+
+// You could also set the opacity of the canvas to less than 100% before filling the poly/rect/circle.
+
+
+// stores the device context of the canvas we use to draw the outlines
+// initialized in myInit, used in myHover and myLeave
+var hdc;
+
+// takes a string that contains coords eg - "227,307,261,309, 339,354, 328,371, 240,331"
+// draws a line from each co-ord pair to the next - assumes starting point needs to be repeated as ending point.
+function drawPoly(coOrdStr)
+{
+	console.log('drawPoly',coOrdStr);
+    var mCoords = coOrdStr.split(',');
+    var i, n;
+    n = mCoords.length;
+
+    hdc.beginPath();
+    hdc.moveTo(mCoords[0], mCoords[1]);
+    for (i=2; i<n; i+=2)
+    {
+        hdc.lineTo(mCoords[i], mCoords[i+1]);
+    }
+    hdc.lineTo(mCoords[0], mCoords[1]);
+    hdc.stroke();
+}
+
+function drawRect(coOrdStr)
+{
+	console.log('drawRect',coOrdStr);
+    var mCoords = coOrdStr.split(',');
+    var top, left, bot, right;
+    left = mCoords[0];
+    top = mCoords[1];
+    right = mCoords[2];
+    bot = mCoords[3];
+    hdc.strokeRect(left,top,right-left,bot-top); 
+}
+
+function myHover(element)
+{
+	console.log('myHover',element);
+    var hoveredElement = element;
+    var coordStr = element.getAttribute('coords');
+    var areaType = element.getAttribute('shape');
+
+    switch (areaType)
+    {
+        case 'poly':
+            drawPoly(coordStr);
+            break;
+        case 'rect':
+            drawRect(coordStr);
+    }
+}
+
+function myLeave()
+{
+	console.log('myLeave');
+    var canvas = document.getElementById('myCanvas');
+    hdc.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function myInit()
+{
+	console.log('myInit');
+    // get the target image
+    var img = document.getElementById('community-map');
+
+    var x,y, w,h;
+
+    // get it's position and width+height
+    x = img.offsetLeft;
+    y = img.offsetTop;
+    w = img.clientWidth;
+    h = img.clientHeight;
+	console.log('image positions', x, y, w, h);
+
+    // move the canvas, so it's contained by the same parent as the image
+    var imgParent = img.parentNode;
+    var can = document.getElementById('myCanvas');
+    imgParent.appendChild(can);
+
+    // place the canvas in front of the image
+    can.style.zIndex = 1;
+
+    // position it over the image
+    can.style.left = x+'px';
+    can.style.top = y+'px';
+
+    // make same size as the image
+    can.setAttribute('width', w+'px');
+    can.setAttribute('height', h+'px');
+
+    // get it's context
+    hdc = can.getContext('2d');
+	console.log('canvas',can);
+    // set the 'default' values for the colour/width of fill/stroke operations
+    hdc.fillStyle = 'red';
+    hdc.strokeStyle = 'red';
+    hdc.lineWidth = 2;
+	console.log('hdc',hdc);
+}
+</script>
+		<!-- <style>
+			.aquifor-UPPER{
+				background-color: blue;
+			}
+		</style> -->
+		<style>
+body
+{
+    background-color: gray;
+}
+canvas
+{
+    pointer-events: none;       /* make the canvas transparent to the mouse - needed since canvas is position infront of image */
+    position: absolute;
+}
+</style>
+	</head>
+	<body onload='myInit()'><canvas id='myCanvas'></canvas>
+<div>
+<img id="community-map" alt="map of ponderosa hills lots" src="community_map_lot_lines.png" usemap="#image_map"/>
+
+<map name="image_map" id="community-map">
+    <area 
+            alt='12858 FOREST CANYON DR' 
+            title='12858 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3042,372,3170,457' 
+            shape='rect'
+            \><area 
+            alt='12498 ANTELOPE TRL' 
+            title='12498 ANTELOPE TRL DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1359,1041,1450,1132,1511,1068,1427,973' 
+            shape='poly'
+            \><area 
+            alt='12342 ANTELOPE TRL' 
+            title='12342 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1214,1365,1305,1274,1210,1179,1176,1220,1163,1250,1160,1277,1173,1321' 
+            shape='poly'
+            \><area 
+            alt='12485 ANTELOPE TRL' 
+            title='12485 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1305,1054,1373,987,1281,895,1217,963' 
+            shape='poly'
+            \><area 
+            alt='12020 ANTELOPE TRL' 
+            title='12020 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1528,1572,1687,1666,1684,1697,1589,1700,1542,1683,1515,1663' 
+            shape='poly'
+            \><area 
+            alt='12564 ANTELOPE TRL' 
+            title='12564 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1430,967,1518,1062,1586,994,1498,900' 
+            shape='poly'
+            \><area 
+            alt='12689 ANTELOPE TRL' 
+            title='12689 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1515,541,1643,625' 
+            shape='rect'
+            \><area 
+            alt='12271 ANTELOPE TRL' 
+            title='12271 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1024,1449,1136,1449,1197,1385,1149,1327,1024,1388' 
+            shape='poly'
+            \><area 
+            alt='12464 FOREST CANYON DR' 
+            title='12464 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2380,1336,2468,1468' 
+            shape='rect'
+            \><area 
+            alt='12293 ANTELOPE TRL' 
+            title='12293 ANTELOPE TRL UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1021,1380,1146,1319,1139,1295,1136,1262,1024,1245' 
+            shape='poly'
+            \><area 
+            alt='12678 ANTELOPE TRL' 
+            title='12678 ANTELOPE TRL DENVER' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1640,759,1660,732,1670,705,1677,681,1819,715,1768,813,1724,857' 
+            shape='poly'
+            \><area 
+            alt='12418 FOREST CANYON DR' 
+            title='12418 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2194,1321,2228,1335,2279,1335,2279,1467,2194,1470,2147,1443' 
+            shape='poly'
+            \><area 
+            alt='12833 FOREST CANYON DR' 
+            title='12833 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2889,463,3014,555' 
+            shape='rect'
+            \><area 
+            alt='12380 FOREST CANYON DR' 
+            title='12380 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2191,1320,2143,1442,2025,1371,2123,1270,2150,1300' 
+            shape='poly'
+            \><area 
+            alt='12517 FOREST CANYON DR' 
+            title='12517 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2576,1185,2667,1317' 
+            shape='rect'
+            \><area 
+            alt='12418 FOREST CANYON DR' 
+            title='12418 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2194,1321,2228,1335,2279,1335,2279,1467,2194,1470,2147,1443' 
+            shape='poly'
+            \><area 
+            alt='12630 ANTELOPE TRL' 
+            title='12630 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1569,828,1660,919,1717,858,1633,763' 
+            shape='poly'
+            \><area 
+            alt='12521 ANTELOPE TRL' 
+            title='12521 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1285,893,1352,825,1444,920,1376,984' 
+            shape='poly'
+            \><area 
+            alt='12542 FOREST CANYON DR' 
+            title='12542 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2671,1336,2776,1336,2765,1468,2671,1468' 
+            shape='poly'
+            \><area 
+            alt='12228 ANTELOPE TRL' 
+            title='12228 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1278,1304,1369,1396,1308,1457,1217,1369' 
+            shape='poly'
+            \><area 
+            alt='12371 FOREST CANYON DR' 
+            title='12371 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2042,1162,2106,1098,2201,1189,2140,1257' 
+            shape='poly'
+            \><area 
+            alt='12678 ANTELOPE TRL' 
+            title='12678 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1640,759,1660,732,1670,705,1677,681,1819,715,1768,813,1724,857' 
+            shape='poly'
+            \><area 
+            alt='12121 ANTELOPE TRL' 
+            title='12121 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1311,1660,1396,1575,1467,1646,1383,1731' 
+            shape='poly'
+            \><area 
+            alt='12755 FOREST CANYON DR' 
+            title='12755 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2889,764,3014,852' 
+            shape='rect'
+            \><area 
+            alt='12454 ANTELOPE TRL' 
+            title='12454 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1285,1106,1376,1201,1444,1136,1356,1045' 
+            shape='poly'
+            \><area 
+            alt='12493 FOREST CANYON DR' 
+            title='12493 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2485,1185,2569,1317' 
+            shape='rect'
+            \><area 
+            alt='12372 FOREST CANYON DR' 
+            title='12372 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1971,1237,2032,1176,2120,1264,2062,1328' 
+            shape='poly'
+            \><area 
+            alt='12564 ANTELOPE TRL' 
+            title='12564 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1430,967,1518,1062,1586,994,1498,900' 
+            shape='poly'
+            \><area 
+            alt='12388 ANTELOPE TRL' 
+            title='12388 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1214,1178,1281,1111,1373,1209,1308,1273' 
+            shape='poly'
+            \><area 
+            alt='12011 ANTELOPE TRL' 
+            title='12011 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1633,1724,1768,1808' 
+            shape='rect'
+            \><area 
+            alt='12231 ANTELOPE TRL' 
+            title='12231 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1136,1450,1200,1386,1288,1474,1251,1504,1197,1524,1160,1538' 
+            shape='poly'
+            \><area 
+            alt='12619 ANTELOPE TRL' 
+            title='12619 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1501,897,1592,992,1657,925,1565,833' 
+            shape='poly'
+            \><area 
+            alt='12834 FOREST CANYON DR' 
+            title='12834 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3042,463,3170,558' 
+            shape='rect'
+            \><area 
+            alt='12514 FOREST CANYON DR' 
+            title='12514 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2573,1339,2667,1468' 
+            shape='rect'
+            \><area 
+            alt='12620 ANTELOPE TRL' 
+            title='12620 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1430,751,1494,690,1579,778,1518,846' 
+            shape='poly'
+            \><area 
+            alt='12407 FOREST CANYON DR' 
+            title='12407 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2241,1150,2140,1258,2184,1292,2221,1309,2282,1316,2282,1164' 
+            shape='poly'
+            \><area 
+            alt='12442 FOREST CANYON DR' 
+            title='12442 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2282,1337,2377,1469' 
+            shape='rect'
+            \><area 
+            alt='12331 ANTELOPE TRL' 
+            title='12331 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1024,1238,1136,1255,1139,1231,1160,1197,1065,1113,1024,1150' 
+            shape='poly'
+            \><area 
+            alt='12006 ANTELOPE TRL' 
+            title='12006 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1690,1697,1690,1663,1815,1541,1910,1710,1788,1707,1772,1690,1751,1700' 
+            shape='poly'
+            \><area 
+            alt='12081 ANTELOPE TRL' 
+            title='12081 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1518,1697,1545,1710,1569,1717,1592,1720,1626,1720,1626,1808,1444,1808' 
+            shape='poly'
+            \><area 
+            alt='12498 ANTELOPE TRL' 
+            title='12498 ANTELOPE TRL LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='1359,1041,1450,1132,1511,1068,1427,973' 
+            shape='poly'
+            \><area 
+            alt='12680 FOREST CANYON DR' 
+            title='12680 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3039,1072,3168,1164' 
+            shape='rect'
+            \><area 
+            alt='12703 FOREST CANYON DR' 
+            title='12703 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2889,961,3014,1052' 
+            shape='rect'
+            \><area 
+            alt='12679 FOREST CANYON DR' 
+            title='12679 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2887,1056,3019,1155' 
+            shape='rect'
+            \><area 
+            alt='12782 FOREST CANYON DR' 
+            title='12782 FOREST CANYON DR LOWER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3042,666,3170,754' 
+            shape='rect'
+            \><area 
+            alt='12590 FOREST CANYON DR' 
+            title='12590 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2870,1335,2955,1335,2975,1467,2870,1467' 
+            shape='poly'
+            \><area 
+            alt='12660 FOREST CANYON DR' 
+            title='12660 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3043,1169,3168,1173,3168,1291,3036,1254' 
+            shape='poly'
+            \><area 
+            alt='12620 FOREST CANYON DR' 
+            title='12620 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3036,1257,3168,1298,3164,1460,3009,1308,3026,1284' 
+            shape='poly'
+            \><area 
+            alt='12568 FOREST CANYON DR' 
+            title='12568 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2779,1336,2867,1336,2867,1468,2765,1468' 
+            shape='poly'
+            \><area 
+            alt='12732 FOREST CANYON DR' 
+            title='12732 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3038,863,3170,957' 
+            shape='rect'
+            \><area 
+            alt='12731 FOREST CANYON DR' 
+            title='12731 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2889,859,3014,954' 
+            shape='rect'
+            \><area 
+            alt='12612 FOREST CANYON DR' 
+            title='12612 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3002,1308,3168,1467,2978,1467,2958,1335,2982,1325' 
+            shape='poly'
+            \><area 
+            alt='12565 FOREST CANYON DR' 
+            title='12565 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='2772,1183,2860,1315' 
+            shape='rect'
+            \><area 
+            alt='12756 FOREST CANYON DR' 
+            title='12756 FOREST CANYON DR UPPER DAWSON' 
+            href='' 
+            onmouseover='myHover(this);' 
+            onmouseout='myLeave();'
+            coords='3038,761,3170,856' 
+            shape='rect'
+            \></map>
+</div>	</body>
+</html>
